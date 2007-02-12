@@ -7,11 +7,11 @@
 #define SELCOLOR		"#69c"
 
 #define SY			0
-#define SH			DisplayHeight(0		/* sy = YOFFSET */
-#define MASTER			600		/* per thousand */
+#define SH			DisplayHeight(dpy, screen)
+#define MASTER			600				/* per thousand */
 #define MODKEY			Mod1Mask
-#define NMASTER			1		/* clients in master area */
-#define SNAP			40		/* pixel */
+#define NMASTER			1				/* clients in master area */
+#define SNAP			40				/* pixel */
 
 #define KEYS \
 static Key key[] = { \

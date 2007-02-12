@@ -128,6 +128,7 @@ attach(Arg *arg) {
 	if(!c)
 		return;
 	c->view = !c->view;
+	pop(c);
 	focus(c);
 	arrange();
 }

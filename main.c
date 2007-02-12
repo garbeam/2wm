@@ -143,7 +143,7 @@ main(int argc, char *argv[]) {
 	XSetWindowAttributes wa;
 
 	if(argc == 2 && !strncmp("-v", argv[1], 3))
-		eprint("2wm-"VERSION", (C)opyright MMVI-MMVII Anselm R. Garbe\n");
+		eprint("2wm-"VERSION", (C)opyright MMVII Anselm R. Garbe\n");
 	else if(argc != 1)
 		eprint("usage: 2wm [-v]\n");
 	setlocale(LC_CTYPE, "");
@@ -198,9 +198,10 @@ main(int argc, char *argv[]) {
 	normcol = getcolor(NORMCOLOR);
 	selcol = getcolor(SELCOLOR);
 	/* geometry */
-	sx = sy = 0;
+	sx = 0;
+	sy = SY;
 	sw = DisplayWidth(dpy, screen);
-	sh = DisplayHeight(dpy, screen);
+	sh = SH;
 	master = MASTER;
 	nmaster = NMASTER;
 	/* multihead support */
