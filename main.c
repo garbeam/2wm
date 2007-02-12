@@ -17,8 +17,9 @@
 
 /* extern */
 
-int bh, bmw, screen, sx, sy, sw, sh, wax, way, waw, wah;
+int screen, sx, sy, sw, sh, wax, way, waw, wah;
 unsigned int master, nmaster, ntags, numlockmask;
+unsigned long normcol, selcol;
 Atom wmatom[WMLast], netatom[NetLast];
 Bool running = True;
 Bool *seltag;
@@ -28,8 +29,7 @@ Client *sel = NULL;
 Client *stack = NULL;
 Cursor cursor[CurLast];
 Display *dpy;
-DC dc = {0};
-Window root, barwin;
+Window root;
 
 /* static */
 
@@ -53,14 +53,7 @@ cleanup(void) {
 		resize(stack, True);
 		unmanage(stack);
 	}
-	if(dc.font.set)
-		XFreeFontSet(dpy, dc.font.set);
-	else
-		XFreeFont(dpy, dc.font.xfont);
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
-	XFreePixmap(dpy, dc.drawable);
-	XFreeGC(dpy, dc.gc);
-	XDestroyWindow(dpy, barwin);
 	XFreeCursor(dpy, cursor[CurNormal]);
 	XFreeCursor(dpy, cursor[CurResize]);
 	XFreeCursor(dpy, cursor[CurMove]);
@@ -131,12 +124,8 @@ setup(void) {
 	seltag = emallocz(sizeof(Bool) * ntags);
 	seltag[0] = True;
 	/* style */
-	dc.norm[ColBorder] = getcolor(NORMBORDERCOLOR);
-	dc.norm[ColBG] = getcolor(NORMBGCOLOR);
-	dc.norm[ColFG] = getcolor(NORMFGCOLOR);
-	dc.sel[ColBorder] = getcolor(SELBORDERCOLOR);
-	dc.sel[ColBG] = getcolor(SELBGCOLOR);
-	dc.sel[ColFG] = getcolor(SELFGCOLOR);
+	normcol = getcolor(NORMCOLOR);
+	selcol = getcolor(SELCOLOR);
 	/* geometry */
 	sx = sy = 0;
 	sw = DisplayWidth(dpy, screen);
@@ -148,10 +137,6 @@ setup(void) {
 	way = sy;
 	wah = sh;
 	waw = sw;
-	/* pixmap for everything */
-	dc.drawable = XCreatePixmap(dpy, root, sw, bh, DefaultDepth(dpy, screen));
-	dc.gc = XCreateGC(dpy, root, 0, 0);
-	XSetLineAttributes(dpy, dc.gc, 1, LineSolid, CapButt, JoinMiter);
 	/* multihead support */
 	selscreen = XQueryPointer(dpy, root, &w, &w, &i, &i, &i, &i, &mask);
 }

@@ -7,32 +7,24 @@ const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", NULL };
 
 #define BORDERPX		1
 #define DEFMODE			dotile		/* dofloat */
-#define FLOATSYMBOL		"><>"
-#define TILESYMBOL		"[]="
 
-#define FONT			"-*-terminus-medium-r-*-*-14-*-*-*-*-*-*-*"
-#define NORMBORDERCOLOR		"#333"
-#define NORMBGCOLOR		"#222"
-#define NORMFGCOLOR		"#ccc"
-#define SELBORDERCOLOR		"#69c"
-#define SELBGCOLOR		"#555"
-#define SELFGCOLOR		"#fff"
+#define NORMCOLOR		"#333"
+#define SELCOLOR		"#69c"
 
 #define MASTER			600		/* per thousand */
 #define MODKEY			Mod1Mask
 #define NMASTER			1		/* clients in master area */
 #define SNAP			40		/* pixel */
-#define TOPBAR			True		/* False */
 
 #define KEYS \
 static Key key[] = { \
 	/* modifier			key		function	argument */ \
 	{ MODKEY|ShiftMask,		XK_Return,	spawn, \
-		{ .cmd = "exec uxterm -bg '#222' -fg '#eee' -cr '#eee' +sb -fn '"FONT"'" } }, \
+		{ .cmd = "exec uxterm -bg '#222' -fg '#eee' -cr '#eee' +sb -fn '-*-terminus-medium-r-*-*-14-*-*-*-*-*-*-*'" } }, \
 	{ MODKEY,			XK_p,		spawn, \
 		{ .cmd = "exe=\"$(lsx `echo $PATH | sed 's/:/ /g'` | sort -u " \
-			" | dmenu -fn '"FONT"' -nb '"NORMBGCOLOR"' -nf '"NORMFGCOLOR"' " \
-			"-sb '"SELBGCOLOR"' -sf '"SELFGCOLOR"')\" && exec $exe" } }, \
+			" | dmenu -fn '-*-terminus-medium-r-*-*-14-*-*-*-*-*-*-*' -nb '#222' -nf '#ccc' " \
+			"-sb '#555' -sf '#fff')\" && exec $exe" } }, \
 	{ MODKEY,			XK_j,		focusnext,	{ 0 } }, \
 	{ MODKEY,			XK_k,		focusprev,	{ 0 } }, \
 	{ MODKEY,			XK_Return,	zoom,		{ 0 } }, \

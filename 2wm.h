@@ -11,29 +11,11 @@
 enum { NetSupported, NetWMName, NetLast };		/* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMLast };	/* default atoms */
 enum { CurNormal, CurResize, CurMove, CurLast };	/* cursor */
-enum { ColBorder, ColFG, ColBG, ColLast };		/* color */
 
 typedef union {
 	const char *cmd;
 	int i;
 } Arg; /* argument type */
-
-typedef struct {
-	int ascent;
-	int descent;
-	int height;
-	XFontSet set;
-	XFontStruct *xfont;
-} Fnt;
-
-typedef struct {
-	int x, y, w, h;
-	unsigned long norm[ColLast];
-	unsigned long sel[ColLast];
-	Drawable drawable;
-	Fnt font;
-	GC gc;
-} DC; /* draw context */
 
 typedef struct Client Client;
 struct Client {
@@ -63,7 +45,7 @@ extern Atom wmatom[WMLast], netatom[NetLast];
 extern Bool running, selscreen, *seltag;	/* seltag is array of Bool */
 extern Client *clients, *sel, *stack;		/* global client list and stack */
 extern Cursor cursor[CurLast];
-extern DC dc;					/* global draw context */
+extern unsigned long normcol, selcol;		/* sel/normal color */
 extern Display *dpy;
 extern Window root;
 

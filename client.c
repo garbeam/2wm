@@ -90,7 +90,7 @@ focus(Client *c) {
 		return;
 	if(sel && sel != c) {
 		grabbuttons(sel, False);
-		XSetWindowBorder(dpy, sel->win, dc.norm[ColBorder]);
+		XSetWindowBorder(dpy, sel->win, normcol);
 	}
 	if(c) {
 		detachstack(c);
@@ -102,7 +102,7 @@ focus(Client *c) {
 	if(!selscreen)
 		return;
 	if(c) {
-		XSetWindowBorder(dpy, c->win, dc.sel[ColBorder]);
+		XSetWindowBorder(dpy, c->win, selcol);
 		XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
 	}
 	else
@@ -177,7 +177,7 @@ manage(Window w, XWindowAttributes *wa) {
 		StructureNotifyMask | PropertyChangeMask | EnterWindowMask);
 	XGetTransientForHint(dpy, c->win, &trans);
 	grabbuttons(c, False);
-	XSetWindowBorder(dpy, c->win, dc.norm[ColBorder]);
+	XSetWindowBorder(dpy, c->win, normcol);
 	updatetitle(c);
 	settags(c, getclient(trans));
 	if(!c->isfloat)
