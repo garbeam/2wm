@@ -10,20 +10,11 @@
 #include <X11/Xutil.h>
 
 
-typedef struct {
-	const char *clpattern;
-	const char *tpattern;
-	Bool isfloat;
-} Rule;
-
-typedef struct {
-	regex_t *clregex;
-	regex_t *tregex;
-} RReg;
+typedef struct { regex_t *regex; } RReg;
 
 /* static */
 
-RULES
+FLOATS
 
 static RReg *rreg = NULL;
 static unsigned int len = 0;
@@ -49,22 +40,15 @@ initrregs(void) {
 
 	if(rreg)
 		return;
-	len = sizeof rule / sizeof rule[0];
+	for(len = 0; floats[len]; len++);
 	rreg = emallocz(len * sizeof(RReg));
 	for(i = 0; i < len; i++) {
-		if(rule[i].clpattern) {
+		if(floats[i]) {
 			reg = emallocz(sizeof(regex_t));
-			if(regcomp(reg, rule[i].clpattern, REG_EXTENDED))
+			if(regcomp(reg, floats[i], REG_EXTENDED))
 				free(reg);
 			else
-				rreg[i].clregex = reg;
-		}
-		if(rule[i].tpattern) {
-			reg = emallocz(sizeof(regex_t));
-			if(regcomp(reg, rule[i].tpattern, REG_EXTENDED))
-				free(reg);
-			else
-				rreg[i].tregex = reg;
+				rreg[i].regex = reg;
 		}
 	}
 }
@@ -84,8 +68,10 @@ setvisible(Client *c, Client *trans) {
 				ch.res_class ? ch.res_class : "",
 				ch.res_name ? ch.res_name : "", c->name);
 		for(i = 0; i < len; i++)
-			if(rreg[i].clregex && !regexec(rreg[i].clregex, prop, 1, &tmp, 0))
-				c->isfloat = rule[i].isfloat;
+			if(rreg[i].regex && !regexec(rreg[i].regex, prop, 1, &tmp, 0)) {
+				c->isfloat = True;
+				break;
+			}
 		if(ch.res_class)
 			XFree(ch.res_class);
 		if(ch.res_name)

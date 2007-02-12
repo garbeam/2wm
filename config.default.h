@@ -33,11 +33,5 @@ static Key key[] = { \
 	{ MODKEY|ShiftMask,		XK_q,		quit,		{ 0 } }, \
 };
 
-#define RULES \
-static Rule rule[] = { \
-	/* class:instance:title regex	tags regex	isfloat */ \
-	{ "Firefox.*",			"3",		False }, \
-	{ "Gimp.*",			NULL,		True }, \
-	{ "MPlayer.*",			NULL,		True }, \
-	{ "Acroread.*",			NULL,		True }, \
-};
+#define FLOATS \
+static char *floats[] = { "Gimp.*", "MPlayer.*", "Acroread.*", NULL };
