@@ -26,7 +26,7 @@ struct Client {
 	int minax, minay, maxax, maxay;
 	long flags; 
 	unsigned int border;
-	Bool isfixed, isfloat, ismax, visible;
+	Bool isfixed, isfloat, ismax, view;
 	Client *next;
 	Client *prev;
 	Client *snext;
@@ -38,7 +38,7 @@ extern unsigned int master, nmaster;		/* master percent, number of master client
 extern unsigned int numlockmask;		/* dynamic key lock mask */
 extern void (*handler[LASTEvent])(XEvent *);	/* event handler */
 extern Atom wmatom[WMLast], netatom[NetLast];
-extern Bool running, selscreen, visible;
+extern Bool running, selscreen, view;
 extern Client *clients, *sel, *stack;		/* global client list and stack */
 extern Cursor cursor[CurLast];
 extern unsigned long normcol, selcol;		/* sel/normal color */
@@ -47,6 +47,7 @@ extern Window root;
 
 /* client.c */
 extern void configure(Client *c);		/* send synthetic configure event */
+extern void detachclient(Client *c);		/* detaches c from global client list */
 extern void focus(Client *c);			/* focus c, c may be NULL */
 extern Client *getclient(Window w);		/* return client of w */
 extern Bool isprotodel(Client *c);		/* returns True if c->win supports wmatom[WMDelete] */
@@ -71,18 +72,16 @@ extern void eprint(const char *errstr, ...);	/* prints errstr and exits with 1 *
 extern void spawn(Arg *arg);			/* forks a new subprocess with to arg's cmd */
 
 /* view.c */
-extern void initrregs(void);			/* initialize regexps of rules defined in config.h */
-extern Client *getnext(Client *c);		/* returns next visible client */
-extern Client *getprev(Client *c);		/* returns previous visible client */
-extern Bool isfloat(Client *c);			/* returns True if c is floatings */
-extern void togglevisible(Arg *arg);		/* toggles c tags with arg's index */
-extern void detach(Client *c);			/* detaches c from global client list */
 extern void arrange(void);			/* arranges all windows tiled */
+extern void attach(Arg *arg);			/* attaches most recent detached client to view */
+extern void detach(Arg *arg);			/* detaches current client from view */
 extern void focusnext(Arg *arg);		/* focuses next visible client, arg is ignored  */
 extern void focusprev(Arg *arg);		/* focuses previous visible client, arg is ignored */
 extern void incnmaster(Arg *arg);		/* increments nmaster with arg's index value */
+extern void initrregs(void);			/* initialize regexps of rules defined in config.h */
+extern Bool isfloat(Client *c);			/* returns True if c is floatings */
 extern void resizemaster(Arg *arg);		/* resizes the master percent with arg's index value */
 extern void restack(void);			/* restores z layers of all clients */
 extern void togglefloat(Arg *arg);		/* toggles focusesd client between floating/non-floating state */
-extern void toggleview(Arg *arg);		/* toggles the tag with arg's index (in)visible */
+extern void toggleview(Arg *arg);		/* toggles view */
 extern void zoom(Arg *arg);			/* zooms the focused client to master area, arg is ignored */

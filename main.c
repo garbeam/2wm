@@ -22,8 +22,8 @@ unsigned int master, nmaster, numlockmask;
 unsigned long normcol, selcol;
 Atom wmatom[WMLast], netatom[NetLast];
 Bool running = True;
-Bool visible = True;
 Bool selscreen = True;
+Bool view = True;
 Client *clients = NULL;
 Client *sel = NULL;
 Client *stack = NULL;
@@ -82,56 +82,6 @@ scan(void) {
 		XFree(wins);
 }
 
-static void
-setup(void) {
-	int i, j;
-	unsigned int mask;
-	Window w;
-	XModifierKeymap *modmap;
-	XSetWindowAttributes wa;
-
-	/* init atoms */
-	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
-	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
-	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
-	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
-	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
-			PropModeReplace, (unsigned char *) netatom, NetLast);
-	/* init cursors */
-	cursor[CurNormal] = XCreateFontCursor(dpy, XC_left_ptr);
-	cursor[CurResize] = XCreateFontCursor(dpy, XC_sizing);
-	cursor[CurMove] = XCreateFontCursor(dpy, XC_fleur);
-	/* init modifier map */
-	numlockmask = 0;
-	modmap = XGetModifierMapping(dpy);
-	for (i = 0; i < 8; i++) {
-		for (j = 0; j < modmap->max_keypermod; j++) {
-			if(modmap->modifiermap[i * modmap->max_keypermod + j] == XKeysymToKeycode(dpy, XK_Num_Lock))
-				numlockmask = (1 << i);
-		}
-	}
-	XFreeModifiermap(modmap);
-	/* select for events */
-	wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
-		| EnterWindowMask | LeaveWindowMask;
-	wa.cursor = cursor[CurNormal];
-	XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &wa);
-	grabkeys();
-	initrregs();
-	/* style */
-	normcol = getcolor(NORMCOLOR);
-	selcol = getcolor(SELCOLOR);
-	/* geometry */
-	sx = sy = 0;
-	sw = DisplayWidth(dpy, screen);
-	sh = DisplayHeight(dpy, screen);
-	master = MASTER;
-	nmaster = NMASTER;
-	/* multihead support */
-	selscreen = XQueryPointer(dpy, root, &w, &w, &i, &i, &i, &i, &mask);
-}
-
 /*
  * Startup Error handler to check if another window manager
  * is already running.
@@ -185,7 +135,12 @@ xerror(Display *dpy, XErrorEvent *ee) {
 
 int
 main(int argc, char *argv[]) {
+	int i, j;
+	unsigned int mask;
+	Window w;
 	XEvent ev;
+	XModifierKeymap *modmap;
+	XSetWindowAttributes wa;
 
 	if(argc == 2 && !strncmp("-v", argv[1], 3))
 		eprint("2wm-"VERSION", (C)opyright MMVI-MMVII Anselm R. Garbe\n");
@@ -209,7 +164,47 @@ main(int argc, char *argv[]) {
 	XSetErrorHandler(NULL);
 	xerrorxlib = XSetErrorHandler(xerror);
 	XSync(dpy, False);
-	setup();
+
+	/* init atoms */
+	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
+	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
+	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
+	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
+	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
+			PropModeReplace, (unsigned char *) netatom, NetLast);
+	/* init cursors */
+	cursor[CurNormal] = XCreateFontCursor(dpy, XC_left_ptr);
+	cursor[CurResize] = XCreateFontCursor(dpy, XC_sizing);
+	cursor[CurMove] = XCreateFontCursor(dpy, XC_fleur);
+	/* init modifier map */
+	numlockmask = 0;
+	modmap = XGetModifierMapping(dpy);
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < modmap->max_keypermod; j++) {
+			if(modmap->modifiermap[i * modmap->max_keypermod + j] == XKeysymToKeycode(dpy, XK_Num_Lock))
+				numlockmask = (1 << i);
+		}
+	}
+	XFreeModifiermap(modmap);
+	/* select for events */
+	wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask
+		| EnterWindowMask | LeaveWindowMask;
+	wa.cursor = cursor[CurNormal];
+	XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &wa);
+	grabkeys();
+	initrregs();
+	/* style */
+	normcol = getcolor(NORMCOLOR);
+	selcol = getcolor(SELCOLOR);
+	/* geometry */
+	sx = sy = 0;
+	sw = DisplayWidth(dpy, screen);
+	sh = DisplayHeight(dpy, screen);
+	master = MASTER;
+	nmaster = NMASTER;
+	/* multihead support */
+	selscreen = XQueryPointer(dpy, root, &w, &w, &i, &i, &i, &i, &mask);
 	scan();
 
 	/* main event loop, also reads status text from stdin */

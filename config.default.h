@@ -6,6 +6,8 @@
 #define NORMCOLOR		"#333"
 #define SELCOLOR		"#69c"
 
+#define SY			0
+#define SH			DisplayHeight(0		/* sy = YOFFSET */
 #define MASTER			600		/* per thousand */
 #define MODKEY			Mod1Mask
 #define NMASTER			1		/* clients in master area */
@@ -20,6 +22,8 @@ static Key key[] = { \
 		{ .cmd = "exe=\"$(lsx `echo $PATH | sed 's/:/ /g'` | sort -u " \
 			" | dmenu -fn '-*-terminus-medium-r-*-*-14-*-*-*-*-*-*-*' -nb '#222' -nf '#ccc' " \
 			"-sb '#555' -sf '#fff')\" && exec $exe" } }, \
+	{ MODKEY,			XK_a,		attach,		{ 0 } }, \
+	{ MODKEY,			XK_d,		detach,		{ 0 } }, \
 	{ MODKEY,			XK_j,		focusnext,	{ 0 } }, \
 	{ MODKEY,			XK_k,		focusprev,	{ 0 } }, \
 	{ MODKEY,			XK_Return,	zoom,		{ 0 } }, \
@@ -27,7 +31,6 @@ static Key key[] = { \
 	{ MODKEY,			XK_s,		resizemaster,	{ .i = -15 } }, \
 	{ MODKEY,			XK_i,		incnmaster,	{ .i = 1 } }, \
 	{ MODKEY,			XK_r,		incnmaster,	{ .i = -1 } }, \
-	{ MODKEY,			XK_d,		togglevisible,	{ .i = -1 } }, \
 	{ MODKEY|ShiftMask,		XK_c,		killclient,	{ 0 } }, \
 	{ MODKEY,			XK_space,	toggleview,	{ 0 } }, \
 	{ MODKEY|ShiftMask,		XK_space,	togglefloat,	{ 0 } }, \

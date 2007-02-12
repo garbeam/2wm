@@ -155,7 +155,7 @@ configurerequest(XEvent *e) {
 		XSync(dpy, False);
 		if(c->isfloat) {
 			resize(c, False);
-			if(c->visible != visible)
+			if(c->view != view)
 				XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
 		}
 		else
@@ -190,11 +190,11 @@ enternotify(XEvent *e) {
 
 	if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
 		return;
-	if((c = getclient(ev->window)) && c->visible == visible)
+	if((c = getclient(ev->window)) && c->view == view)
 		focus(c);
 	else if(ev->window == root) {
 		selscreen = True;
-		for(c = stack; c && c->visible != visible; c = c->snext);
+		for(c = stack; c && c->view != view; c = c->snext);
 		focus(c);
 	}
 }

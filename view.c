@@ -17,13 +17,33 @@ typedef struct { regex_t *regex; } RReg;
 FLOATS
 
 static RReg *rreg = NULL;
-static unsigned int len = 0;
+static unsigned int reglen = 0;
 
+static Client *
+getnext(Client *c) {
+	for(; c && c->view != view; c = c->next);
+	return c;
+}
+
+static Client *
+getprev(Client *c) {
+	for(; c && c->view != view; c = c->prev);
+	return c;
+}
 
 static Client *
 nexttiled(Client *c) {
 	for(c = getnext(c); c && c->isfloat; c = getnext(c->next));
 	return c;
+}
+
+static void
+pop(Client *c) {
+	detachclient(c);
+	if(clients)
+		clients->prev = c;
+	c->next = clients;
+	clients = c;
 }
 
 static void
@@ -51,81 +71,6 @@ togglemax(Client *c) {
 
 /* extern */
 
-Client *
-getnext(Client *c) {
-	for(; c && c->visible != visible; c = c->next);
-	return c;
-}
-
-Client *
-getprev(Client *c) {
-	for(; c && c->visible != visible; c = c->prev);
-	return c;
-}
-
-void
-initrregs(void) {
-	unsigned int i;
-	regex_t *reg;
-
-	if(rreg)
-		return;
-	for(len = 0; floats[len]; len++);
-	rreg = emallocz(len * sizeof(RReg));
-	for(i = 0; i < len; i++) {
-		if(floats[i]) {
-			reg = emallocz(sizeof(regex_t));
-			if(regcomp(reg, floats[i], REG_EXTENDED))
-				free(reg);
-			else
-				rreg[i].regex = reg;
-		}
-	}
-}
-
-Bool
-isfloat(Client *c) {
-	char prop[512];
-	unsigned int i;
-	regmatch_t tmp;
-	Bool ret = False;
-	XClassHint ch = { 0 };
-
-	XGetClassHint(dpy, c->win, &ch);
-	snprintf(prop, sizeof prop, "%s:%s:%s",
-			ch.res_class ? ch.res_class : "",
-			ch.res_name ? ch.res_name : "", c->name);
-	for(i = 0; i < len; i++)
-		if(rreg[i].regex && !regexec(rreg[i].regex, prop, 1, &tmp, 0)) {
-			ret = True;
-			break;
-		}
-	if(ch.res_class)
-		XFree(ch.res_class);
-	if(ch.res_name)
-		XFree(ch.res_name);
-	return ret;
-}
-
-void
-togglevisible(Arg *arg) {
-	if(!sel)
-		return;
-	sel->visible = !sel->visible;
-	arrange();
-}
-
-void
-detach(Client *c) {
-	if(c->prev)
-		c->prev->next = c->next;
-	if(c->next)
-		c->next->prev = c->prev;
-	if(c == clients)
-		clients = c->next;
-	c->next = c->prev = NULL;
-}
-
 void
 arrange(void) {
 	unsigned int i, n, mw, mh, tw, th;
@@ -140,7 +85,7 @@ arrange(void) {
 	tw = sw - mw;
 
 	for(i = 0, c = clients; c; c = c->next)
-		if(c->visible == visible) {
+		if(c->view == view) {
 			if(c->isfloat) {
 				resize(c, True);
 				continue;
@@ -168,11 +113,25 @@ arrange(void) {
 		}
 		else
 			XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
-	if(!sel || sel->visible != visible) {
-		for(c = stack; c && c->visible != visible; c = c->snext);
+	if(!sel || sel->view != view) {
+		for(c = stack; c && c->view != view; c = c->snext);
 		focus(c);
 	}
 	restack();
+}
+
+void
+attach(Arg *arg) {
+
+}
+
+void
+detach(Arg *arg) {
+	if(!sel)
+		return;
+	sel->view = !sel->view;
+	pop(sel);
+	arrange();
 }
 
 void
@@ -212,6 +171,49 @@ incnmaster(Arg *arg) {
 	nmaster += arg->i;
 	if(sel)
 		arrange();
+}
+
+void
+initrregs(void) {
+	unsigned int i;
+	regex_t *reg;
+
+	if(rreg)
+		return;
+	for(reglen = 0; floats[reglen]; reglen++);
+	rreg = emallocz(reglen * sizeof(RReg));
+	for(i = 0; i < reglen; i++)
+		if(floats[i]) {
+			reg = emallocz(sizeof(regex_t));
+			if(regcomp(reg, floats[i], REG_EXTENDED))
+				free(reg);
+			else
+				rreg[i].regex = reg;
+		}
+}
+
+Bool
+isfloat(Client *c) {
+	char prop[512];
+	unsigned int i;
+	regmatch_t tmp;
+	Bool ret = False;
+	XClassHint ch = { 0 };
+
+	XGetClassHint(dpy, c->win, &ch);
+	snprintf(prop, sizeof prop, "%s:%s:%s",
+			ch.res_class ? ch.res_class : "",
+			ch.res_name ? ch.res_name : "", c->name);
+	for(i = 0; i < reglen; i++)
+		if(rreg[i].regex && !regexec(rreg[i].regex, prop, 1, &tmp, 0)) {
+			ret = True;
+			break;
+		}
+	if(ch.res_class)
+		XFree(ch.res_class);
+	if(ch.res_name)
+		XFree(ch.res_name);
+	return ret;
 }
 
 void
@@ -257,7 +259,7 @@ togglefloat(Arg *arg) {
 
 void
 toggleview(Arg *arg) {
-	visible = !visible;
+	view = !view;
 	arrange();
 }
 
@@ -278,11 +280,7 @@ zoom(Arg *arg) {
 	if((c = sel) == nexttiled(clients))
 		if(!(c = nexttiled(c->next)))
 			return;
-	detach(c);
-	if(clients)
-		clients->prev = c;
-	c->next = clients;
-	clients = c;
+	pop(c);
 	focus(c);
 	arrange();
 }

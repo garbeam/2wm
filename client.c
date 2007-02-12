@@ -85,8 +85,19 @@ configure(Client *c) {
 }
 
 void
+detachclient(Client *c) {
+	if(c->prev)
+		c->prev->next = c->next;
+	if(c->next)
+		c->next->prev = c->prev;
+	if(c == clients)
+		clients = c->next;
+	c->next = c->prev = NULL;
+}
+
+void
 focus(Client *c) {
-	if(c && c->visible != visible)
+	if(c && c->view != view)
 		return;
 	if(sel && sel != c) {
 		grabbuttons(sel, False);
@@ -179,9 +190,9 @@ manage(Window w, XWindowAttributes *wa) {
 	XSetWindowBorder(dpy, c->win, normcol);
 	updatetitle(c);
 	if((t = getclient(trans)))
-		c->visible = t->visible;
+		c->view = t->view;
 	else
-		c->visible = visible;
+		c->view = view;
 	if(!(c->isfloat = isfloat(c)))
 		c->isfloat = t || c->isfixed;
 	if(clients)
@@ -192,7 +203,7 @@ manage(Window w, XWindowAttributes *wa) {
 	XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
 	XMapWindow(dpy, c->win);
 	setclientstate(c, NormalState);
-	if(c->visible == visible)
+	if(c->view == view)
 		focus(c);
 	arrange();
 }
@@ -340,10 +351,10 @@ unmanage(Client *c) {
 	/* The server grab construct avoids race conditions. */
 	XGrabServer(dpy);
 	XSetErrorHandler(xerrordummy);
-	detach(c);
 	detachstack(c);
+	detachclient(c);
 	if(sel == c) {
-		for(nc = stack; nc && (nc->visible != visible); nc = nc->snext);
+		for(nc = stack; nc && (nc->view != view); nc = nc->snext);
 		focus(nc);
 	}
 	XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
