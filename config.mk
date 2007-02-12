@@ -1,5 +1,5 @@
 # 2wm version
-VERSION = 0.1
+VERSION = 0.2
 
 # Customize below to fit your system
 
@@ -17,8 +17,8 @@ LIBS = -L/usr/lib -lc -L${X11LIB} -lX11
 # flags
 CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
 LDFLAGS = ${LIBS}
-CFLAGS = -g -Wall -O2 ${INCS} -DVERSION=\"${VERSION}\"
-LDFLAGS = -g ${LIBS}
+#CFLAGS = -g -Wall -O2 ${INCS} -DVERSION=\"${VERSION}\"
+#LDFLAGS = -g ${LIBS}
 
 # Solaris
 #CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"
