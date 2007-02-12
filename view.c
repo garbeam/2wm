@@ -37,8 +37,6 @@ togglemax(Client *c) {
 
 /* extern */
 
-void (*arrange)(void) = DEFMODE;
-
 void
 detach(Client *c) {
 	if(c->prev)
@@ -51,25 +49,7 @@ detach(Client *c) {
 }
 
 void
-dofloat(void) {
-	Client *c;
-
-	for(c = clients; c; c = c->next) {
-		if(isvisible(c)) {
-			resize(c, True);
-		}
-		else
-			XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
-	}
-	if(!sel || !isvisible(sel)) {
-		for(c = stack; c && !isvisible(c); c = c->snext);
-		focus(c);
-	}
-	restack();
-}
-
-void
-dotile(void) {
+arrange(void) {
 	unsigned int i, n, mw, mh, tw, th;
 	Client *c;
 
@@ -82,7 +62,7 @@ dotile(void) {
 	tw = sw - mw;
 
 	for(i = 0, c = clients; c; c = c->next)
-		if(isvisible(c)) {
+		if(c->visible == visible) {
 			if(c->isfloat) {
 				resize(c, True);
 				continue;
@@ -110,8 +90,8 @@ dotile(void) {
 		}
 		else
 			XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
-	if(!sel || !isvisible(sel)) {
-		for(c = stack; c && !isvisible(c); c = c->snext);
+	if(!sel || sel->visible != visible) {
+		for(c = stack; c && c->visible != visible; c = c->snext);
 		focus(c);
 	}
 	restack();
@@ -149,22 +129,11 @@ focusprev(Arg *arg) {
 
 void
 incnmaster(Arg *arg) {
-	if((arrange == dofloat) || (nmaster + arg->i < 1)
-		|| (sh / (nmaster + arg->i) <= 2 * BORDERPX))
+	if((nmaster + arg->i < 1) || (sh / (nmaster + arg->i) <= 2 * BORDERPX))
 		return;
 	nmaster += arg->i;
 	if(sel)
 		arrange();
-}
-
-Bool
-isvisible(Client *c) {
-	unsigned int i;
-
-	for(i = 0; i < ntags; i++)
-		if(c->tags[i] && seltag[i])
-			return True;
-	return False;
 }
 
 void
@@ -187,16 +156,14 @@ restack(void) {
 
 	if(!sel)
 		return;
-	if(sel->isfloat || arrange == dofloat)
+	if(sel->isfloat)
 		XRaiseWindow(dpy, sel->win);
-	if(arrange != dofloat) {
-		if(!sel->isfloat)
-			XLowerWindow(dpy, sel->win);
-		for(c = nexttiled(clients); c; c = nexttiled(c->next)) {
-			if(c == sel)
-				continue;
-			XLowerWindow(dpy, c->win);
-		}
+	else
+		XLowerWindow(dpy, sel->win);
+	for(c = nexttiled(clients); c; c = nexttiled(c->next)) {
+		if(c == sel)
+			continue;
+		XLowerWindow(dpy, c->win);
 	}
 	XSync(dpy, False);
 	while(XCheckMaskEvent(dpy, EnterWindowMask, &ev));
@@ -204,38 +171,19 @@ restack(void) {
 
 void
 togglefloat(Arg *arg) {
-	if (!sel || arrange == dofloat)
+	if(!sel)
 		return;
 	sel->isfloat = !sel->isfloat;
 	arrange();
 }
 
 void
-togglemode(Arg *arg) {
-	arrange = (arrange == dofloat) ? dotile : dofloat;
-	if(sel)
-		arrange();
-}
-
-void
 toggleview(Arg *arg) {
-	unsigned int i;
+	Client *c;
 
-	seltag[arg->i] = !seltag[arg->i];
-	for(i = 0; i < ntags && !seltag[i]; i++);
-	if(i == ntags)
-		seltag[arg->i] = True; /* cannot toggle last view */
-	arrange();
-}
-
-void
-view(Arg *arg) {
-	unsigned int i;
-
-	for(i = 0; i < ntags; i++)
-		seltag[i] = (arg->i == -1) ? True : False;
-	if(arg->i >= 0 && arg->i < ntags)
-		seltag[arg->i] = True;
+	for(c = clients; c; c = c->next)
+		c->visible = !c->visible;
+	visible = !visible;
 	arrange();
 }
 
@@ -246,7 +194,7 @@ zoom(Arg *arg) {
 
 	if(!sel)
 		return;
-	if(sel->isfloat || (arrange == dofloat)) {
+	if(sel->isfloat) {
 		togglemax(sel);
 		return;
 	}

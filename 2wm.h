@@ -26,22 +26,19 @@ struct Client {
 	int minax, minay, maxax, maxay;
 	long flags; 
 	unsigned int border;
-	Bool isfixed, isfloat, ismax;
-	Bool *tags;
+	Bool isfixed, isfloat, ismax, visible;
 	Client *next;
 	Client *prev;
 	Client *snext;
 	Window win;
 };
 
-extern const char *tags[];			/* all tags */
 extern int screen, sx, sy, sw, sh;		/* screen geometry */
 extern unsigned int master, nmaster;		/* master percent, number of master clients */
-extern unsigned int ntags, numlockmask;		/* number of tags, dynamic lock mask */
+extern unsigned int numlockmask;		/* dynamic key lock mask */
 extern void (*handler[LASTEvent])(XEvent *);	/* event handler */
-extern void (*arrange)(void);			/* arrange function, indicates mode  */
 extern Atom wmatom[WMLast], netatom[NetLast];
-extern Bool running, selscreen, *seltag;	/* seltag is array of Bool */
+extern Bool running, selscreen, visible;
 extern Client *clients, *sel, *stack;		/* global client list and stack */
 extern Cursor cursor[CurLast];
 extern unsigned long normcol, selcol;		/* sel/normal color */
@@ -72,9 +69,8 @@ extern int xerror(Display *dsply, XErrorEvent *ee);	/* 2wm's X error handler */
 extern void initrregs(void);			/* initialize regexps of rules defined in config.h */
 extern Client *getnext(Client *c);		/* returns next visible client */
 extern Client *getprev(Client *c);		/* returns previous visible client */
-extern void settags(Client *c, Client *trans);	/* sets tags of c */
-extern void tag(Arg *arg);			/* tags c with arg's index */
-extern void toggletag(Arg *arg);		/* toggles c tags with arg's index */
+extern void setvisible(Client *c, Client *trans);/* sets visibility of c */
+extern void togglevisible(Arg *arg);		/* toggles c tags with arg's index */
 
 /* util.c */
 extern void *emallocz(unsigned int size);	/* allocates zero-initialized memory, exits on error */
@@ -83,16 +79,12 @@ extern void spawn(Arg *arg);			/* forks a new subprocess with to arg's cmd */
 
 /* view.c */
 extern void detach(Client *c);			/* detaches c from global client list */
-extern void dofloat(void);			/* arranges all windows floating */
-extern void dotile(void);			/* arranges all windows tiled */
+extern void arrange(void);			/* arranges all windows tiled */
 extern void focusnext(Arg *arg);		/* focuses next visible client, arg is ignored  */
 extern void focusprev(Arg *arg);		/* focuses previous visible client, arg is ignored */
 extern void incnmaster(Arg *arg);		/* increments nmaster with arg's index value */
-extern Bool isvisible(Client *c);		/* returns True if client is visible */
 extern void resizemaster(Arg *arg);		/* resizes the master percent with arg's index value */
 extern void restack(void);			/* restores z layers of all clients */
 extern void togglefloat(Arg *arg);		/* toggles focusesd client between floating/non-floating state */
-extern void togglemode(Arg *arg);		/* toggles global arrange function (dotile/dofloat) */
 extern void toggleview(Arg *arg);		/* toggles the tag with arg's index (in)visible */
-extern void view(Arg *arg);			/* views the tag with arg's index */
 extern void zoom(Arg *arg);			/* zooms the focused client to master area, arg is ignored */

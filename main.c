@@ -18,11 +18,11 @@
 /* extern */
 
 int screen, sx, sy, sw, sh;
-unsigned int master, nmaster, ntags, numlockmask;
+unsigned int master, nmaster, numlockmask;
 unsigned long normcol, selcol;
 Atom wmatom[WMLast], netatom[NetLast];
 Bool running = True;
-Bool *seltag;
+Bool visible = True;
 Bool selscreen = True;
 Client *clients = NULL;
 Client *sel = NULL;
@@ -59,7 +59,6 @@ cleanup(void) {
 	XFreeCursor(dpy, cursor[CurMove]);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XSync(dpy, False);
-	free(seltag);
 }
 
 static void
@@ -120,9 +119,6 @@ setup(void) {
 	XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &wa);
 	grabkeys();
 	initrregs();
-	for(ntags = 0; tags[ntags]; ntags++);
-	seltag = emallocz(sizeof(Bool) * ntags);
-	seltag[0] = True;
 	/* style */
 	normcol = getcolor(NORMCOLOR);
 	selcol = getcolor(SELCOLOR);

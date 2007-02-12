@@ -111,14 +111,13 @@ buttonpress(XEvent *e) {
 		focus(c);
 		if(CLEANMASK(ev->state) != MODKEY)
 			return;
-		if(ev->button == Button1 && (arrange == dofloat || c->isfloat)) {
+		if(ev->button == Button1 && c->isfloat) {
 			restack();
 			movemouse(c);
 		}
 		else if(ev->button == Button2)
 			zoom(NULL);
-		else if(ev->button == Button3 && (arrange == dofloat || c->isfloat) &&
-				!c->isfixed) {
+		else if(ev->button == Button3 && c->isfloat && !c->isfixed) {
 			restack();
 			resizemouse(c);
 		}
@@ -156,7 +155,7 @@ configurerequest(XEvent *e) {
 		XSync(dpy, False);
 		if(c->isfloat) {
 			resize(c, False);
-			if(!isvisible(c))
+			if(c->visible != visible)
 				XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
 		}
 		else
@@ -191,11 +190,11 @@ enternotify(XEvent *e) {
 
 	if(ev->mode != NotifyNormal || ev->detail == NotifyInferior)
 		return;
-	if((c = getclient(ev->window)) && isvisible(c))
+	if((c = getclient(ev->window)) && c->visible == visible)
 		focus(c);
 	else if(ev->window == root) {
 		selscreen = True;
-		for(c = stack; c && !isvisible(c); c = c->snext);
+		for(c = stack; c && c->visible != visible; c = c->snext);
 		focus(c);
 	}
 }

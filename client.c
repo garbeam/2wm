@@ -86,7 +86,7 @@ configure(Client *c) {
 
 void
 focus(Client *c) {
-	if(c && !isvisible(c))
+	if(c && c->visible != visible)
 		return;
 	if(sel && sel != c) {
 		grabbuttons(sel, False);
@@ -150,7 +150,6 @@ manage(Window w, XWindowAttributes *wa) {
 	Window trans;
 
 	c = emallocz(sizeof(Client));
-	c->tags = emallocz(ntags * sizeof(Bool));
 	c->win = w;
 	c->x = wa->x;
 	c->y = wa->y;
@@ -179,7 +178,7 @@ manage(Window w, XWindowAttributes *wa) {
 	grabbuttons(c, False);
 	XSetWindowBorder(dpy, c->win, normcol);
 	updatetitle(c);
-	settags(c, getclient(trans));
+	setvisible(c, getclient(trans));
 	if(!c->isfloat)
 		c->isfloat = trans || c->isfixed;
 	if(clients)
@@ -190,7 +189,7 @@ manage(Window w, XWindowAttributes *wa) {
 	XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
 	XMapWindow(dpy, c->win);
 	setclientstate(c, NormalState);
-	if(isvisible(c))
+	if(c->visible == visible)
 		focus(c);
 	arrange();
 }
@@ -341,12 +340,11 @@ unmanage(Client *c) {
 	detach(c);
 	detachstack(c);
 	if(sel == c) {
-		for(nc = stack; nc && !isvisible(nc); nc = nc->snext);
+		for(nc = stack; nc && (nc->visible != visible); nc = nc->snext);
 		focus(nc);
 	}
 	XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
 	setclientstate(c, WithdrawnState);
-	free(c->tags);
 	free(c);
 	XSync(dpy, False);
 	XSetErrorHandler(xerror);

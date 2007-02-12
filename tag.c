@@ -23,7 +23,6 @@ typedef struct {
 
 /* static */
 
-TAGS
 RULES
 
 static RReg *rreg = NULL;
@@ -33,13 +32,13 @@ static unsigned int len = 0;
 
 Client *
 getnext(Client *c) {
-	for(; c && !isvisible(c); c = c->next);
+	for(; c && c->visible != visible; c = c->next);
 	return c;
 }
 
 Client *
 getprev(Client *c) {
-	for(; c && !isvisible(c); c = c->prev);
+	for(; c && c->visible != visible; c = c->prev);
 	return c;
 }
 
@@ -71,64 +70,33 @@ initrregs(void) {
 }
 
 void
-settags(Client *c, Client *trans) {
+setvisible(Client *c, Client *trans) {
 	char prop[512];
-	unsigned int i, j;
+	unsigned int i;
 	regmatch_t tmp;
-	Bool matched = trans != NULL;
 	XClassHint ch = { 0 };
 
-	if(matched) {
-		for(i = 0; i < ntags; i++)
-			c->tags[i] = trans->tags[i];
-	}
+	if(trans)
+		c->visible = trans->visible;
 	else {
 		XGetClassHint(dpy, c->win, &ch);
 		snprintf(prop, sizeof prop, "%s:%s:%s",
 				ch.res_class ? ch.res_class : "",
 				ch.res_name ? ch.res_name : "", c->name);
 		for(i = 0; i < len; i++)
-			if(rreg[i].clregex && !regexec(rreg[i].clregex, prop, 1, &tmp, 0)) {
+			if(rreg[i].clregex && !regexec(rreg[i].clregex, prop, 1, &tmp, 0))
 				c->isfloat = rule[i].isfloat;
-				for(j = 0; rreg[i].tregex && j < ntags; j++) {
-					if(!regexec(rreg[i].tregex, tags[j], 1, &tmp, 0)) {
-						matched = True;
-						c->tags[j] = True;
-					}
-				}
-			}
 		if(ch.res_class)
 			XFree(ch.res_class);
 		if(ch.res_name)
 			XFree(ch.res_name);
 	}
-	if(!matched)
-		for(i = 0; i < ntags; i++)
-			c->tags[i] = seltag[i];
 }
 
 void
-tag(Arg *arg) {
-	unsigned int i;
-
+togglevisible(Arg *arg) {
 	if(!sel)
 		return;
-	for(i = 0; i < ntags; i++)
-		sel->tags[i] = (arg->i == -1) ? True : False;
-	if(arg->i >= 0 && arg->i < ntags)
-		sel->tags[arg->i] = True;
-	arrange();
-}
-
-void
-toggletag(Arg *arg) {
-	unsigned int i;
-
-	if(!sel)
-		return;
-	sel->tags[arg->i] = !sel->tags[arg->i];
-	for(i = 0; i < ntags && !sel->tags[i]; i++);
-	if(i == ntags)
-		sel->tags[arg->i] = True;
+	sel->visible = !sel->visible;
 	arrange();
 }
