@@ -65,19 +65,17 @@ extern void quit(Arg *arg);			/* quit 2wm nicely */
 extern void sendevent(Window w, Atom a, long value);	/* send synthetic event to w */
 extern int xerror(Display *dsply, XErrorEvent *ee);	/* 2wm's X error handler */
 
-/* tag.c */
-extern void initrregs(void);			/* initialize regexps of rules defined in config.h */
-extern Client *getnext(Client *c);		/* returns next visible client */
-extern Client *getprev(Client *c);		/* returns previous visible client */
-extern void setvisible(Client *c, Client *trans);/* sets visibility of c */
-extern void togglevisible(Arg *arg);		/* toggles c tags with arg's index */
-
 /* util.c */
 extern void *emallocz(unsigned int size);	/* allocates zero-initialized memory, exits on error */
 extern void eprint(const char *errstr, ...);	/* prints errstr and exits with 1 */
 extern void spawn(Arg *arg);			/* forks a new subprocess with to arg's cmd */
 
 /* view.c */
+extern void initrregs(void);			/* initialize regexps of rules defined in config.h */
+extern Client *getnext(Client *c);		/* returns next visible client */
+extern Client *getprev(Client *c);		/* returns previous visible client */
+extern void setvisible(Client *c, Client *trans);/* sets visibility of c */
+extern void togglevisible(Arg *arg);		/* toggles c tags with arg's index */
 extern void detach(Client *c);			/* detaches c from global client list */
 extern void arrange(void);			/* arranges all windows tiled */
 extern void focusnext(Arg *arg);		/* focuses next visible client, arg is ignored  */
