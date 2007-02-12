@@ -17,7 +17,7 @@
 
 /* extern */
 
-int screen, sx, sy, sw, sh, wax, way, waw, wah;
+int screen, sx, sy, sw, sh;
 unsigned int master, nmaster, ntags, numlockmask;
 unsigned long normcol, selcol;
 Atom wmatom[WMLast], netatom[NetLast];
@@ -132,11 +132,6 @@ setup(void) {
 	sh = DisplayHeight(dpy, screen);
 	master = MASTER;
 	nmaster = NMASTER;
-	/* windowarea */
-	wax = sx;
-	way = sy;
-	wah = sh;
-	waw = sw;
 	/* multihead support */
 	selscreen = XQueryPointer(dpy, root, &w, &w, &i, &i, &i, &i, &mask);
 }
@@ -172,7 +167,7 @@ quit(Arg *arg) {
 	running = False;
 }
 
-/* There's no way to check accesses to destroyed windows, thus those cases are
+/* There's no sy to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
  */

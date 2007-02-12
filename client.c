@@ -163,14 +163,14 @@ manage(Window w, XWindowAttributes *wa) {
 	}
 	else {
 		c->border = BORDERPX;
-		if(c->x + c->w + 2 * c->border > wax + waw)
-			c->x = wax + waw - c->w - 2 * c->border;
-		if(c->y + c->h + 2 * c->border > way + wah)
-			c->y = way + wah - c->h - 2 * c->border;
-		if(c->x < wax)
-			c->x = wax;
-		if(c->y < way)
-			c->y = way;
+		if(c->x + c->w + 2 * c->border > sx + sw)
+			c->x = sx + sw - c->w - 2 * c->border;
+		if(c->y + c->h + 2 * c->border > sy + sh)
+			c->y = sy + sh - c->h - 2 * c->border;
+		if(c->x < sx)
+			c->x = sx;
+		if(c->y < sy)
+			c->y = sy;
 	}
 	updatesizehints(c);
 	XSelectInput(dpy, c->win,

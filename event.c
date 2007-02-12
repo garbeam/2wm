@@ -49,14 +49,14 @@ movemouse(Client *c) {
 			XSync(dpy, False);
 			c->x = ocx + (ev.xmotion.x - x1);
 			c->y = ocy + (ev.xmotion.y - y1);
-			if(abs(wax + c->x) < SNAP)
-				c->x = wax;
-			else if(abs((wax + waw) - (c->x + c->w + 2 * c->border)) < SNAP)
-				c->x = wax + waw - c->w - 2 * c->border;
-			if(abs(way - c->y) < SNAP)
-				c->y = way;
-			else if(abs((way + wah) - (c->y + c->h + 2 * c->border)) < SNAP)
-				c->y = way + wah - c->h - 2 * c->border;
+			if(abs(sx + c->x) < SNAP)
+				c->x = sx;
+			else if(abs((sx + sw) - (c->x + c->w + 2 * c->border)) < SNAP)
+				c->x = sx + sw - c->w - 2 * c->border;
+			if(abs(sy - c->y) < SNAP)
+				c->y = sy;
+			else if(abs((sy + sh) - (c->y + c->h + 2 * c->border)) < SNAP)
+				c->y = sy + sh - c->h - 2 * c->border;
 			resize(c, False);
 			break;
 		}

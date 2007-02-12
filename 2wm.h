@@ -36,7 +36,6 @@ struct Client {
 
 extern const char *tags[];			/* all tags */
 extern int screen, sx, sy, sw, sh;		/* screen geometry */
-extern int wax, way, wah, waw;			/* windowarea geometry */
 extern unsigned int master, nmaster;		/* master percent, number of master clients */
 extern unsigned int ntags, numlockmask;		/* number of tags, dynamic lock mask */
 extern void (*handler[LASTEvent])(XEvent *);	/* event handler */

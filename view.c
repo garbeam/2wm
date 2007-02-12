@@ -20,10 +20,10 @@ togglemax(Client *c) {
 		return;
 
 	if((c->ismax = !c->ismax)) {
-		c->rx = c->x; c->x = wax;
-		c->ry = c->y; c->y = way;
-		c->rw = c->w; c->w = waw - 2 * BORDERPX;
-		c->rh = c->h; c->h = wah - 2 * BORDERPX;
+		c->rx = c->x; c->x = sx;
+		c->ry = c->y; c->y = sy;
+		c->rw = c->w; c->w = sw - 2 * BORDERPX;
+		c->rh = c->h; c->h = sh - 2 * BORDERPX;
 	}
 	else {
 		c->x = c->rx;
@@ -76,10 +76,10 @@ dotile(void) {
 	for(n = 0, c = nexttiled(clients); c; c = nexttiled(c->next))
 		n++;
 	/* window geoms */
-	mh = (n > nmaster) ? wah / nmaster : wah / (n > 0 ? n : 1);
-	mw = (n > nmaster) ? (waw * master) / 1000 : waw;
-	th = (n > nmaster) ? wah / (n - nmaster) : 0;
-	tw = waw - mw;
+	mh = (n > nmaster) ? sh / nmaster : sh / (n > 0 ? n : 1);
+	mw = (n > nmaster) ? (sw * master) / 1000 : sw;
+	th = (n > nmaster) ? sh / (n - nmaster) : 0;
+	tw = sw - mw;
 
 	for(i = 0, c = clients; c; c = c->next)
 		if(isvisible(c)) {
@@ -88,8 +88,8 @@ dotile(void) {
 				continue;
 			}
 			c->ismax = False;
-			c->x = wax;
-			c->y = way;
+			c->x = sx;
+			c->y = sy;
 			if(i < nmaster) {
 				c->y += i * mh;
 				c->w = mw - 2 * BORDERPX;
@@ -103,7 +103,7 @@ dotile(void) {
 					c->h = th - 2 * BORDERPX;
 				}
 				else /* fallback if th <= 2 * BORDERPX */
-					c->h = wah - 2 * BORDERPX;
+					c->h = sh - 2 * BORDERPX;
 			}
 			resize(c, False);
 			i++;
@@ -150,7 +150,7 @@ focusprev(Arg *arg) {
 void
 incnmaster(Arg *arg) {
 	if((arrange == dofloat) || (nmaster + arg->i < 1)
-		|| (wah / (nmaster + arg->i) <= 2 * BORDERPX))
+		|| (sh / (nmaster + arg->i) <= 2 * BORDERPX))
 		return;
 	nmaster += arg->i;
 	if(sel)
@@ -172,8 +172,8 @@ resizemaster(Arg *arg) {
 	if(arg->i == 0)
 		master = MASTER;
 	else {
-		if(waw * (master + arg->i) / 1000 >= waw - 2 * BORDERPX
-			|| waw * (master + arg->i) / 1000 <= 2 * BORDERPX)
+		if(sw * (master + arg->i) / 1000 >= sw - 2 * BORDERPX
+			|| sw * (master + arg->i) / 1000 <= 2 * BORDERPX)
 			return;
 		master += arg->i;
 	}
