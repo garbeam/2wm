@@ -1,0 +1,92 @@
+.TH 2WM 1 2wm-VERSION
+.SH NAME
+2wm \- stereo window manager
+.SH SYNOPSIS
+.B 2wm
+.RB [ \-v ]
+.SH DESCRIPTION
+2wm is a dynamic window manager for X. It manages windows in a master and
+stacking area. The master area contains the windows which currently need most
+attention, whereas the stacking area contains all other windows. Dialog windows
+are always managed floating, regardless of the mode applied. Each window can be
+made floating on demand.
+.P
+There are no workspaces and no tags. Instead there are two sets of windows, the
+currently attached windows and the currently detached windows. Each window can
+be detached and reattached, and you can invert the view to attach all detached
+windows and to detach all attached windows.
+.P
+2wm draws a small border around windows to indicate the focus state.
+.SH OPTIONS
+.TP
+.B \-v
+prints version information to standard output, then exits.
+.SH USAGE
+.SS Keyboard commands
+.TP
+.B Mod1-Shift-Return
+Start
+.BR xterm (1).
+.TP
+.B Mod1-j
+Focus next window.
+.TP
+.B Mod1-k
+Focus previous window.
+.TP
+.B Mod1-Return
+Zooms/cycles current window to/from master area, toggles maximization of current floating window.
+.TP
+.B Mod1-g
+Grow master area.
+.TP
+.B Mod1-s
+Shrink master area.
+.TP
+.B Mod1-a
+Attach most recently detached window.
+.TP
+.B Mod1-d
+Detach focused window.
+.TP
+.B Mod1-i
+Increase the number of windows in the master area.
+.TP
+.B Mod1-r
+Decrease the number of windows in the master area.
+.TP
+.B Mod1-Shift-c
+Close focused window.
+.TP
+.B Mod1-space
+Invert view, toggles detached with attached windows.
+.TP
+.B Mod1-Shift-space
+Toggle focused window between floating and non-floating state.
+.TP
+.B Mod1-Shift-q
+Quit 2wm.
+.SS Mouse commands
+.TP
+.B Mod1-Button1
+Move current floating window while dragging.
+.TP
+.B Mod1-Button2
+Zoom current window to the master area, toggles maximization of current floating window.
+.TP
+.B Mod1-Button3
+Resize current floating window while dragging.
+.SH CUSTOMIZATION
+2wm is customized by creating a custom config.h and (re)compiling the source
+code. This keeps it fast, secure and simple.
+.SH SEE ALSO
+.BR dmenu (1) ,
+.BR sbar (1)
+.SH BUGS
+Java applications which use the XToolkit/XAWT backend may draw grey windows
+only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
+JDK 1.6 versions, because it assumes a reparenting window manager. As a workaround
+you can use JDK 1.4 (which doesn't contain the XToolkit/XAWT backend) or you
+can set the following environment variable (to use the older Motif
+backend instead):
+.BR AWT_TOOLKIT=MToolkit .
