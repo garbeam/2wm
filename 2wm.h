@@ -74,7 +74,7 @@ extern void spawn(Arg *arg);			/* forks a new subprocess with to arg's cmd */
 extern void initrregs(void);			/* initialize regexps of rules defined in config.h */
 extern Client *getnext(Client *c);		/* returns next visible client */
 extern Client *getprev(Client *c);		/* returns previous visible client */
-extern void setvisible(Client *c, Client *trans);/* sets visibility of c */
+extern Bool isfloat(Client *c);			/* returns True if c is floatings */
 extern void togglevisible(Arg *arg);		/* toggles c tags with arg's index */
 extern void detach(Client *c);			/* detaches c from global client list */
 extern void arrange(void);			/* arranges all windows tiled */

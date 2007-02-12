@@ -83,30 +83,28 @@ initrregs(void) {
 	}
 }
 
-void
-setvisible(Client *c, Client *trans) {
+Bool
+isfloat(Client *c) {
 	char prop[512];
 	unsigned int i;
 	regmatch_t tmp;
+	Bool ret = False;
 	XClassHint ch = { 0 };
 
-	if(trans)
-		c->visible = trans->visible;
-	else {
-		XGetClassHint(dpy, c->win, &ch);
-		snprintf(prop, sizeof prop, "%s:%s:%s",
-				ch.res_class ? ch.res_class : "",
-				ch.res_name ? ch.res_name : "", c->name);
-		for(i = 0; i < len; i++)
-			if(rreg[i].regex && !regexec(rreg[i].regex, prop, 1, &tmp, 0)) {
-				c->isfloat = True;
-				break;
-			}
-		if(ch.res_class)
-			XFree(ch.res_class);
-		if(ch.res_name)
-			XFree(ch.res_name);
-	}
+	XGetClassHint(dpy, c->win, &ch);
+	snprintf(prop, sizeof prop, "%s:%s:%s",
+			ch.res_class ? ch.res_class : "",
+			ch.res_name ? ch.res_name : "", c->name);
+	for(i = 0; i < len; i++)
+		if(rreg[i].regex && !regexec(rreg[i].regex, prop, 1, &tmp, 0)) {
+			ret = True;
+			break;
+		}
+	if(ch.res_class)
+		XFree(ch.res_class);
+	if(ch.res_name)
+		XFree(ch.res_name);
+	return ret;
 }
 
 void
@@ -259,10 +257,6 @@ togglefloat(Arg *arg) {
 
 void
 toggleview(Arg *arg) {
-	Client *c;
-
-	for(c = clients; c; c = c->next)
-		c->visible = !c->visible;
 	visible = !visible;
 	arrange();
 }
