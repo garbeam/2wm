@@ -122,7 +122,14 @@ arrange(void) {
 
 void
 attach(Arg *arg) {
+	Client *c;
 
+	for(c = clients; c && c->view == view; c = c->next);
+	if(!c)
+		return;
+	c->view = !c->view;
+	focus(c);
+	arrange();
 }
 
 void
