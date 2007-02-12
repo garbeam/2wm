@@ -35,14 +35,13 @@ movemouse(Client *c) {
 	c->ismax = False;
 	XQueryPointer(dpy, root, &dummy, &dummy, &x1, &y1, &di, &di, &dui);
 	for(;;) {
-		XMaskEvent(dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
+		XMaskEvent(dpy, MOUSEMASK | SubstructureRedirectMask, &ev);
 		switch (ev.type) {
 		case ButtonRelease:
 			resize(c, True);
 			XUngrabPointer(dpy, CurrentTime);
 			return;
 		case ConfigureRequest:
-		case Expose:
 		case MapRequest:
 			handler[ev.type](&ev);
 			break;
@@ -78,7 +77,7 @@ resizemouse(Client *c) {
 	c->ismax = False;
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->border - 1, c->h + c->border - 1);
 	for(;;) {
-		XMaskEvent(dpy, MOUSEMASK | ExposureMask | SubstructureRedirectMask , &ev);
+		XMaskEvent(dpy, MOUSEMASK | SubstructureRedirectMask , &ev);
 		switch(ev.type) {
 		case ButtonRelease:
 			resize(c, True);
@@ -88,7 +87,6 @@ resizemouse(Client *c) {
 			while(XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 			return;
 		case ConfigureRequest:
-		case Expose:
 		case MapRequest:
 			handler[ev.type](&ev);
 			break;
@@ -106,47 +104,10 @@ resizemouse(Client *c) {
 
 static void
 buttonpress(XEvent *e) {
-	int x;
-	Arg a;
 	Client *c;
 	XButtonPressedEvent *ev = &e->xbutton;
 
-	if(barwin == ev->window) {
-		x = 0;
-		for(a.i = 0; a.i < ntags; a.i++) {
-			x += textw(tags[a.i]);
-			if(ev->x < x) {
-				if(ev->button == Button1) {
-					if(ev->state & MODKEY)
-						tag(&a);
-					else
-						view(&a);
-				}
-				else if(ev->button == Button3) {
-					if(ev->state & MODKEY)
-						toggletag(&a);
-					else
-						toggleview(&a);
-				}
-				return;
-			}
-		}
-		if(ev->x < x + bmw)
-			switch(ev->button) {
-			case Button1:
-				togglemode(NULL);
-				break;
-			case Button4:
-				a.i = 1;
-				incnmaster(&a);
-				break;
-			case Button5:
-				a.i = -1;
-				incnmaster(&a);
-				break;
-			}
-	}
-	else if((c = getclient(ev->window))) {
+	if((c = getclient(ev->window))) {
 		focus(c);
 		if(CLEANMASK(ev->state) != MODKEY)
 			return;
@@ -240,16 +201,6 @@ enternotify(XEvent *e) {
 }
 
 static void
-expose(XEvent *e) {
-	XExposeEvent *ev = &e->xexpose;
-
-	if(ev->count == 0) {
-		if(barwin == ev->window)
-			drawstatus();
-	}
-}
-
-static void
 keypress(XEvent *e) {
 	static unsigned int len = sizeof key / sizeof key[0];
 	unsigned int i;
@@ -322,11 +273,6 @@ propertynotify(XEvent *e) {
 				updatesizehints(c);
 				break;
 		}
-		if(ev->atom == XA_WM_NAME || ev->atom == netatom[NetWMName]) {
-			updatetitle(c);
-			if(c == sel)
-				drawstatus();
-		}
 	}
 }
 
@@ -347,7 +293,6 @@ void (*handler[LASTEvent]) (XEvent *) = {
 	[DestroyNotify] = destroynotify,
 	[EnterNotify] = enternotify,
 	[LeaveNotify] = leavenotify,
-	[Expose] = expose,
 	[KeyPress] = keypress,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
@@ -372,16 +317,5 @@ grabkeys(void) {
 				GrabModeAsync, GrabModeAsync);
 		XGrabKey(dpy, code, key[i].mod | numlockmask | LockMask, root, True,
 				GrabModeAsync, GrabModeAsync);
-	}
-}
-
-void
-procevent(void) {
-	XEvent ev;
-
-	while(XPending(dpy)) {
-		XNextEvent(dpy, &ev);
-		if(handler[ev.type])
-			(handler[ev.type])(&ev); /* call handler */
 	}
 }

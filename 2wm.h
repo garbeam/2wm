@@ -53,8 +53,6 @@ struct Client {
 };
 
 extern const char *tags[];			/* all tags */
-extern char stext[256];				/* status text */
-extern int bh, bmw;				/* bar height, bar mode label width */
 extern int screen, sx, sy, sw, sh;		/* screen geometry */
 extern int wax, way, wah, waw;			/* windowarea geometry */
 extern unsigned int master, nmaster;		/* master percent, number of master clients */
@@ -67,7 +65,7 @@ extern Client *clients, *sel, *stack;		/* global client list and stack */
 extern Cursor cursor[CurLast];
 extern DC dc;					/* global draw context */
 extern Display *dpy;
-extern Window root, barwin;
+extern Window root;
 
 /* client.c */
 extern void configure(Client *c);		/* send synthetic configure event */
@@ -81,15 +79,8 @@ extern void updatesizehints(Client *c);		/* update the size hint variables of c 
 extern void updatetitle(Client *c);		/* update the name of c */
 extern void unmanage(Client *c);		/* destroy c */
 
-/* draw.c */
-extern void drawstatus(void);			/* draw the bar */
-extern unsigned long getcolor(const char *colstr);	/* return color of colstr */
-extern void setfont(const char *fontstr);	/* set the font for DC */
-extern unsigned int textw(const char *text);	/* return the width of text in px*/
-
 /* event.c */
 extern void grabkeys(void);			/* grab all keys defined in config.h */
-extern void procevent(void);			/* process pending X events */
 
 /* main.c */
 extern void quit(Arg *arg);			/* quit 2wm nicely */

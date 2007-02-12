@@ -17,7 +17,6 @@
 
 /* extern */
 
-char stext[256];
 int bh, bmw, screen, sx, sy, sw, sh, wax, way, waw, wah;
 unsigned int master, nmaster, ntags, numlockmask;
 Atom wmatom[WMLast], netatom[NetLast];
@@ -35,7 +34,17 @@ Window root, barwin;
 /* static */
 
 static int (*xerrorxlib)(Display *, XErrorEvent *);
-static Bool otherwm, readin;
+static Bool otherwm;
+
+static unsigned long
+getcolor(const char *colstr) {
+	Colormap cmap = DefaultColormap(dpy, screen);
+	XColor color;
+
+	if(!XAllocNamedColor(dpy, cmap, colstr, &color, &color))
+		eprint("error, cannot allocate color '%s'\n", colstr);
+	return color.pixel;
+}
 
 static void
 cleanup(void) {
@@ -128,29 +137,16 @@ setup(void) {
 	dc.sel[ColBorder] = getcolor(SELBORDERCOLOR);
 	dc.sel[ColBG] = getcolor(SELBGCOLOR);
 	dc.sel[ColFG] = getcolor(SELFGCOLOR);
-	setfont(FONT);
 	/* geometry */
 	sx = sy = 0;
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
 	master = MASTER;
 	nmaster = NMASTER;
-	bmw = textw(TILESYMBOL) > textw(FLOATSYMBOL) ? textw(TILESYMBOL) : textw(FLOATSYMBOL);
-	/* bar */
-	dc.h = bh = dc.font.height + 2;
-	wa.override_redirect = 1;
-	wa.background_pixmap = ParentRelative;
-	wa.event_mask = ButtonPressMask | ExposureMask;
-	barwin = XCreateWindow(dpy, root, sx, sy + (TOPBAR ? 0 : sh - bh), sw, bh, 0,
-			DefaultDepth(dpy, screen), CopyFromParent, DefaultVisual(dpy, screen),
-			CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-	XDefineCursor(dpy, barwin, cursor[CurNormal]);
-	XMapRaised(dpy, barwin);
-	strcpy(stext, "dwm-"VERSION);
 	/* windowarea */
 	wax = sx;
-	way = sy + (TOPBAR ? bh : 0);
-	wah = sh - bh;
+	way = sy;
+	wah = sh;
 	waw = sw;
 	/* pixmap for everything */
 	dc.drawable = XCreatePixmap(dpy, root, sw, bh, DefaultDepth(dpy, screen));
@@ -188,7 +184,7 @@ sendevent(Window w, Atom a, long value) {
 
 void
 quit(Arg *arg) {
-	readin = running = False;
+	running = False;
 }
 
 /* There's no way to check accesses to destroyed windows, thus those cases are
@@ -206,28 +202,23 @@ xerror(Display *dpy, XErrorEvent *ee) {
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n",
+	fprintf(stderr, "2wm: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
 
 int
 main(int argc, char *argv[]) {
-	char *p;
-	int r, xfd;
-	fd_set rd;
+	XEvent ev;
 
-	if(argc == 2 && !strncmp("-v", argv[1], 3)) {
-		fputs("dwm-"VERSION", (C)opyright MMVI-MMVII Anselm R. Garbe\n", stdout);
-		exit(EXIT_SUCCESS);
-	}
+	if(argc == 2 && !strncmp("-v", argv[1], 3))
+		eprint("2wm-"VERSION", (C)opyright MMVI-MMVII Anselm R. Garbe\n");
 	else if(argc != 1)
-		eprint("usage: dwm [-v]\n");
+		eprint("usage: 2wm [-v]\n");
 	setlocale(LC_CTYPE, "");
 	dpy = XOpenDisplay(0);
 	if(!dpy)
-		eprint("dwm: cannot open display\n");
-	xfd = ConnectionNumber(dpy);
+		eprint("2wm: cannot open display\n");
 	screen = DefaultScreen(dpy);
 	root = RootWindow(dpy, screen);
 	otherwm = False;
@@ -236,51 +227,22 @@ main(int argc, char *argv[]) {
 	XSelectInput(dpy, root, SubstructureRedirectMask);
 	XSync(dpy, False);
 	if(otherwm)
-		eprint("dwm: another window manager is already running\n");
+		eprint("2wm: another window manager is already running\n");
 
 	XSync(dpy, False);
 	XSetErrorHandler(NULL);
 	xerrorxlib = XSetErrorHandler(xerror);
 	XSync(dpy, False);
 	setup();
-	drawstatus();
 	scan();
 
 	/* main event loop, also reads status text from stdin */
 	XSync(dpy, False);
-	procevent();
-	readin = True;
+
 	while(running) {
-		FD_ZERO(&rd);
-		if(readin)
-			FD_SET(STDIN_FILENO, &rd);
-		FD_SET(xfd, &rd);
-		if(select(xfd + 1, &rd, NULL, NULL, NULL) == -1) {
-			if(errno == EINTR)
-				continue;
-			eprint("select failed\n");
-		}
-		if(FD_ISSET(STDIN_FILENO, &rd)) {
-			switch(r = read(STDIN_FILENO, stext, sizeof stext - 1)) {
-			case -1:
-				strncpy(stext, strerror(errno), sizeof stext - 1);
-				stext[sizeof stext - 1] = '\0';
-				readin = False;
-				break;
-			case 0:
-				strncpy(stext, "EOF", 4);
-				readin = False;
-				break;
-			default:
-				for(stext[r] = '\0', p = stext + strlen(stext) - 1; p >= stext && *p == '\n'; *p-- = '\0');
-				for(; p >= stext && *p != '\n'; --p);
-				if(p > stext)
-					strncpy(stext, p + 1, sizeof stext);
-			}
-			drawstatus();
-		}
-		if(FD_ISSET(xfd, &rd))
-			procevent();
+	 	XNextEvent(dpy, &ev);
+		if(handler[ev.type])
+			(handler[ev.type])(&ev); /* call handler */
 	}
 	cleanup();
 	XCloseDisplay(dpy);

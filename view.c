@@ -155,8 +155,6 @@ incnmaster(Arg *arg) {
 	nmaster += arg->i;
 	if(sel)
 		arrange();
-	else
-		drawstatus();
 }
 
 Bool
@@ -187,7 +185,6 @@ restack(void) {
 	Client *c;
 	XEvent ev;
 
-	drawstatus();
 	if(!sel)
 		return;
 	if(sel->isfloat || arrange == dofloat)
@@ -218,8 +215,6 @@ togglemode(Arg *arg) {
 	arrange = (arrange == dofloat) ? dotile : dofloat;
 	if(sel)
 		arrange();
-	else
-		drawstatus();
 }
 
 void
